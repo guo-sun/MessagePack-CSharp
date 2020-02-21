@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.FSharp.Core;
 
 namespace MessagePackCompiler.CodeAnalysis
 {
@@ -31,10 +32,16 @@ namespace MessagePackCompiler.CodeAnalysis
         internal readonly INamedTypeSymbol IgnoreDataMemberAttribute;
         internal readonly INamedTypeSymbol IMessagePackSerializationCallbackReceiver;
         internal readonly INamedTypeSymbol MessagePackFormatterAttribute;
+        internal readonly INamedTypeSymbol FSharpCompilationMapAttribute;
 #pragma warning restore SA1401 // Fields should be private
 
         public ReferenceSymbols(Compilation compilation, Action<string> logger)
         {
+            FSharpCompilationMapAttribute = compilation.GetTypeByMetadataName("Microsoft.FSharp.Core.CompilationMappingAttribute");
+            if (FSharpCompilationMapAttribute == null) {
+                logger("failed to get metadata of Fsharp.Core.CompilationMappingAttribute");
+            }
+
             TaskOfT = compilation.GetTypeByMetadataName("System.Threading.Tasks.Task`1");
             if (TaskOfT == null)
             {
@@ -375,6 +382,13 @@ namespace MessagePackCompiler.CodeAnalysis
                 return;
             }
 
+            if (IsDiscriminatedUnion(type))
+            {
+                this.CollectDiscriminatedUnion(type);
+                return;
+            }
+
+
             if (type.TypeKind == TypeKind.Interface || (type.TypeKind == TypeKind.Class && type.IsAbstract))
             {
                 this.CollectUnion(type);
@@ -385,6 +399,36 @@ namespace MessagePackCompiler.CodeAnalysis
             return;
         }
 
+        private bool IsDiscriminatedUnion(INamedTypeSymbol type)
+        {
+            var attrs = type.GetAttributes();
+            var sumTypeAttrs =
+                attrs.Where(x => {
+                    var isCompMap =
+                        x.AttributeClass.ApproximatelyEqual(this.typeReferences.FSharpCompilationMapAttribute);
+
+                    if (isCompMap && x.ConstructorArguments.Length > 0)
+                    {
+                        var isCompMapValue = (SourceConstructFlags)x.ConstructorArguments[0].Value;
+
+                        return isCompMapValue == SourceConstructFlags.SumType;
+                    }
+
+                    return false;
+                }).ToArray();
+
+            return sumTypeAttrs.Length > 0;
+        }
+
+        private void CollectDiscriminatedUnion(INamedTypeSymbol type)
+        {
+            // TODO-next build info
+            // set Tags field attribute [Key(0)]
+            // add [IgnoreMember] to all others
+            // add to union info
+
+            var info = new UnionSerializationInfo();
+        }
         private void CollectEnum(INamedTypeSymbol type)
         {
             var info = new EnumSerializationInfo
