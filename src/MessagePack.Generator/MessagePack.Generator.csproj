@@ -24,4 +24,8 @@
     <ProjectReference Include="..\MessagePack.GeneratorCore\MessagePack.GeneratorCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" Version="4.5.2" />
+  </ItemGroup>
+
 </Project>
