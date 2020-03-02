@@ -27,11 +27,13 @@ namespace MessagePack.Internal
 #if NETFRAMEWORK // We don't ship a net472 target, but we might add one for debugging purposes
             AssemblyBuilderAccess builderAccess = AssemblyBuilderAccess.RunAndSave;
             this.moduleName = moduleName;
+            this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), builderAccess);
+            this.moduleBuilder = this.assemblyBuilder.DefineDynamicModule(moduleName, moduleName + ".dll");
 #else
             AssemblyBuilderAccess builderAccess = AssemblyBuilderAccess.Run;
-#endif
             this.assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(moduleName), builderAccess);
-            this.moduleBuilder = this.assemblyBuilder.DefineDynamicModule(moduleName + ".dll");
+            this.moduleBuilder = this.assemblyBuilder.DefineDynamicModule(moduleName);
+#endif
         }
 
         /* requires lock on mono environment. see: https://github.com/neuecc/MessagePack-CSharp/issues/161 */
