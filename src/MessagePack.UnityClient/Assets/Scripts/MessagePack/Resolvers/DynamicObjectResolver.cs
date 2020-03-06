@@ -752,21 +752,21 @@ namespace MessagePack.Internal
                     il.Emit(OpCodes.Call, ReadOnlySpanFromByteArray); // convert byte[] to ReadOnlySpan<byte>
 
                     // Optimize, WriteRaw(Unity, large) or UnsafeMemory32/64.WriteRawX
-#if !UNITY_2018_3_OR_NEWER
-                    var valueLen = CodeGenHelpers.GetEncodedStringBytes(item.StringKey).Length;
-                    if (valueLen <= MessagePackRange.MaxFixStringLength)
-                    {
-                        if (UnsafeMemory.Is32Bit)
-                        {
-                            il.EmitCall(typeof(UnsafeMemory32).GetRuntimeMethod("WriteRaw" + valueLen, new[] { typeof(MessagePackWriter).MakeByRefType(), typeof(ReadOnlySpan<byte>) }));
-                        }
-                        else
-                        {
-                            il.EmitCall(typeof(UnsafeMemory64).GetRuntimeMethod("WriteRaw" + valueLen, new[] { typeof(MessagePackWriter).MakeByRefType(), typeof(ReadOnlySpan<byte>) }));
-                        }
-                    }
-                    else
-#endif
+// #if !UNITY_2018_3_OR_NEWER
+//                     var valueLen = CodeGenHelpers.GetEncodedStringBytes(item.StringKey).Length;
+//                     if (valueLen <= MessagePackRange.MaxFixStringLength)
+//                     {
+//                         if (UnsafeMemory.Is32Bit)
+//                         {
+//                             il.EmitCall(typeof(UnsafeMemory32).GetRuntimeMethod("WriteRaw" + valueLen, new[] { typeof(MessagePackWriter).MakeByRefType(), typeof(ReadOnlySpan<byte>) }));
+//                         }
+//                         else
+//                         {
+//                             il.EmitCall(typeof(UnsafeMemory64).GetRuntimeMethod("WriteRaw" + valueLen, new[] { typeof(MessagePackWriter).MakeByRefType(), typeof(ReadOnlySpan<byte>) }));
+//                         }
+//                     }
+//                     else
+// #endif
                     {
                         il.EmitCall(MessagePackWriterTypeInfo.WriteRaw);
                     }
