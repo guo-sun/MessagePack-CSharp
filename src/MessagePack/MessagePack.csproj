@@ -16,6 +16,10 @@
     <AssemblyName>MessagePack</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DefineConstants>$(DefineConstants);UNITY_2018_3_OR_NEWER;NET_STANDARD_2_0;ENABLE_IL2CPP</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\MessagePack.UnityClient\Assets\Scripts\MessagePack\**\*.cs"
              Exclude="..\MessagePack.UnityClient\Assets\Scripts\MessagePack\Annotations\**;
