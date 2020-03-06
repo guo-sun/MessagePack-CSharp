@@ -285,7 +285,7 @@ namespace MessagePack.Internal
             BuiltinResolver.Instance, // Try Builtin
             AttributeFormatterResolver.Instance, // Try use [MessagePackFormatter]
 
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_3_OR_NEWER && !ENABLE_IL2CPP
             MessagePack.Unity.UnityResolver.Instance,
 #endif
 
