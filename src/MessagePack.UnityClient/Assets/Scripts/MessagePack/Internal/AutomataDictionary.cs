@@ -427,7 +427,31 @@ namespace MessagePack.Internal
             {
                 if (span.Length >= 8)
                 {
-                    key = MemoryMarshal.Cast<byte, ulong>(span)[0];
+                    //// remove from here when merging
+                    // This is causing a SIGBUS on ARMv7.
+                    // According to ARMv7 spec, doubleword instructions don't support unaligned access
+                    // http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.faqs/ka15414.html
+
+                    // This bit is direct copypasta from SequenceReaderExtensions.BitConverterToInt64
+                    // Upstream PR fixes this in https://github.com/neuecc/MessagePack-CSharp/pull/932
+
+                    var value = span;
+
+                    if (BitConverter.IsLittleEndian)
+                    {
+                        int i1 = value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24);
+                        int i2 = value[4] | (value[5] << 8) | (value[6] << 16) | (value[7] << 24);
+                        key = (uint)i1 | ((ulong)i2 << 32);
+                    }
+                    else
+                    {
+                        int i1 = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | value[3];
+                        int i2 = (value[4] << 24) | (value[5] << 16) | (value[6] << 8) | value[7];
+                        key = (uint)i2 | ((ulong)i1 << 32);
+                    }
+                    //// remove to here when merging
+                    // key = MemoryMarshal.Cast<byte, ulong>(span)[0];
+
                     span = span.Slice(8);
                 }
                 else
