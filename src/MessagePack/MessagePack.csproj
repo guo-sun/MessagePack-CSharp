@@ -16,11 +16,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);UNITY_ANDROID</DefineConstants>
+    <DefineConstants>$(DefineConstants);UNITY_ANDROID;ENABLE_IL2CPP</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DefineConstants>$(DefineConstants);UNITY_2018_3_OR_NEWER;NET_STANDARD_2_0;ENABLE_IL2CPP</DefineConstants>
+    <DefineConstants>$(DefineConstants);UNITY_2018_3_OR_NEWER;NET_STANDARD_2_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
